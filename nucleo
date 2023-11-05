@@ -1,0 +1,165 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+
+class Nucleon:
+    def __init__(self, mass, initial_position, initial_velocity):
+        self.mass = mass
+        self.position = np.array(initial_position, dtype=float)
+        self.velocity = np.array(initial_velocity, dtype=float)
+
+
+class Simulation:
+    def __init__(self, nucleon1, nucleon2, time_step):
+        self.nucleon1 = nucleon1
+        self.nucleon2 = nucleon2
+        self.time_step = time_step
+        self.nucleon1_positions = []
+        self.nucleon2_positions = []
+
+    def calculate_potential_energy(self):
+        # Расчет потенциальной энергии между нуклонами (по потенциалу Юкавы)
+        distance = np.linalg.norm(self.nucleon1.position - self.nucleon2.position)
+        alpha = 1.0
+        r0 = 1.0e-15
+        return -alpha ** 2 / distance * np.exp(-distance / r0)
+
+    def integrate(self, num_steps):
+        # Интегрирование уравнений движения
+        for _ in range(num_steps):
+            force = self.calculate_force()
+
+            acceleration_nucleon1 = force / self.nucleon1.mass # update
+            acceleration_nucleon2 = -force / self.nucleon2.mass
+
+            self.nucleon1.velocity += acceleration_nucleon1 * self.time_step
+            self.nucleon2.velocity += acceleration_nucleon2 * self.time_step
+
+            self.nucleon1.position += self.nucleon1.velocity * self.time_step
+            self.nucleon2.position += self.nucleon2.velocity * self.time_step
+
+            self.nucleon1_positions.append(self.nucleon1.position.copy())
+            self.nucleon2_positions.append(self.nucleon2.position.copy())
+
+    def get_nucleon1_positions(self): #getters
+        return self.nucleon1_positions
+
+    def get_nucleon2_positions(self):
+        return self.nucleon2_positions
+
+    def get_nucleon1_position(self):
+        return self.nucleon1.position
+
+    def get_nucleon2_position(self):
+        return self.nucleon2.position
+
+    def get_nucleon1_velocity(self):
+        return self.nucleon1.velocity
+
+    def get_nucleon2_velocity(self):
+        return self.nucleon2.velocity
+
+    def calculate_force(self):
+        distance = np.linalg.norm(self.nucleon1.position - self.nucleon2.position)
+        alpha = 1.0
+        r0 = 1.0e-15 #check
+
+        # Расчет силы по формуле потенциала Юкавы
+        force_magnitude = (alpha ** 2 / distance ** 2) * (1 + distance / r0) * np.exp(-distance / r0)
+
+        # Направление силы между нуклонами
+        direction = (self.nucleon2.position - self.nucleon1.position) / distance
+
+        # Вычисление вектора силы
+        force = force_magnitude * direction
+
+        return force
+
+
+mass_proton = 1.67e-27 #make relativistic
+mass_neutron = 1.67e-27
+
+
+# Инициализация нуклонов
+nucleon1 = Nucleon(mass_proton, [0.0, 0.0, 0.0], [0.0, 0.0, 0.0])
+nucleon2 = Nucleon(mass_neutron, [1e-14, 1e-14, 0.0], [1e-9, 0.0, 0.0])
+
+# Инициализация программы
+time_step = 1e-24
+simulation = Simulation(nucleon1, nucleon2, time_step)
+
+# Количество временных шагов
+num_steps = 10000
+
+# Интеграция уравнений движения
+simulation.integrate(num_steps)
+
+# Получение позиций и скоростей
+nucleon1_position = simulation.get_nucleon1_position()
+nucleon2_position = simulation.get_nucleon2_position()
+nucleon1_velocity = simulation.get_nucleon1_velocity()
+nucleon2_velocity = simulation.get_nucleon2_velocity()
+
+print("Нуклон 1: Положение -", nucleon1_position, ", Скорость -", nucleon1_velocity)
+print("Нуклон 2: Положение -", nucleon2_position, ", Скорость -", nucleon2_velocity)
+
+#check
+# Визуализация траекторий нуклонов в 3D
+fig = plt.figure()
+ax = fig.add_subplot(111, projection='3d')
+
+# Получение результатов
+nucleon1_positions = simulation.get_nucleon1_positions()
+nucleon2_positions = simulation.get_nucleon2_positions()
+
+# Построение траектории
+ax.plot(nucleon1_positions[0], nucleon1_positions[1], nucleon1_positions[2], label='Нуклон 1')
+ax.plot(nucleon2_positions[0], nucleon2_positions[1], nucleon2_positions[2], label='Нуклон 2')
+
+# Настройка осей и заголовка
+ax.set_xlabel('X')
+ax.set_ylabel('Y')
+ax.set_zlabel('Z')
+plt.title('Траектории нуклонов')
+
+# Уменьшение масштаба графика (не работает)
+# ax.set_xlim([0, 1e-13])
+# ax.set_ylim([0, 1e-13])
+# ax.set_zlim([0, 1e-16])
+
+ax.legend()
+
+# Показать график
+# plt.tight_layout() (не работает)
+plt.show()
+
+
+
+
+
+time_steps = range(len(nucleon1_positions))  # convert to time
+
+# Построение графика для нуклона 1
+plt.figure(figsize=(12, 6))
+plt.subplot(2, 1, 1)
+plt.plot(time_steps, [pos[0] for pos in nucleon1_positions], label='X')
+plt.plot(time_steps, [pos[1] for pos in nucleon1_positions], label='Y')
+plt.plot(time_steps, [pos[2] for pos in nucleon1_positions], label='Z')
+plt.xlabel('Временные шаги')
+plt.ylabel('Координаты протона')
+plt.legend()
+plt.title('Изменение координат протона во времени')
+
+# Построение графика для нуклона 2
+plt.subplot(2, 1, 2)
+plt.plot(time_steps, [pos[0] for pos in nucleon2_positions], label='X')
+plt.plot(time_steps, [pos[1] for pos in nucleon2_positions], label='Y')
+plt.plot(time_steps, [pos[2] for pos in nucleon2_positions], label='Z')
+plt.xlabel('Временные шаги')
+plt.ylabel('Координаты нейтрона')
+plt.legend()
+plt.title('Изменение координат нейтрона во времени')
+
+plt.tight_layout()
+plt.show()
+
