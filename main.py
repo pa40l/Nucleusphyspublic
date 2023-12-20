@@ -4,21 +4,29 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 from nucleus import Nucleon, Simulation
-
+MASS_1=1.67e-27
+MASS_2=1.67e-27
+INITIAL_POSITION_1="0.0, 0.0"
+INITIAL_VELOCITY_1="1e7, 1e-15"
+INITIAL_POSITION_2="0.6e-14, 1e-15"
+INITIAL_VELOCITY_2="-1e7, 1e-15"
+TIME_STEP=1e-25
+NUMBER_OF_STEPS=6000
 class NuclearSimulationApp:
     def __init__(self, root):
         self.root = root
         self.root.title("Релятивистская динамика")
+        self.root.geometry("1060x500")
 
         # Переменные для ввода данных
-        self.mass_proton = tk.DoubleVar(value=1.67e-27)
-        self.mass_neutron = tk.DoubleVar(value=1.67e-27)
-        self.initial_position_nucleon1 = tk.StringVar(value="0.0, 0.0")
-        self.initial_velocity_nucleon1 = tk.StringVar(value="1e7, 1e-15")
-        self.initial_position_nucleon2 = tk.StringVar(value="0.6e-14, 1e-15")
-        self.initial_velocity_nucleon2 = tk.StringVar(value="-1e7, 1e-15")
-        self.time_step = tk.DoubleVar(value=1e-25)
-        self.num_steps = tk.IntVar(value=6000)
+        self.mass_proton = tk.DoubleVar(value=MASS_1)
+        self.mass_neutron = tk.DoubleVar(value=MASS_2)
+        self.initial_position_nucleon1 = tk.StringVar(value=INITIAL_POSITION_1)
+        self.initial_velocity_nucleon1 = tk.StringVar(value=INITIAL_VELOCITY_1)
+        self.initial_position_nucleon2 = tk.StringVar(value=INITIAL_POSITION_2)
+        self.initial_velocity_nucleon2 = tk.StringVar(value=INITIAL_VELOCITY_2)
+        self.time_step = tk.DoubleVar(value=TIME_STEP)
+        self.num_steps = tk.IntVar(value=NUMBER_OF_STEPS)
 
         # Размещение элементов GUI
         self.create_input_widgets()
